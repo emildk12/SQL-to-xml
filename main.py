@@ -110,8 +110,8 @@ def recurring(cursor, scheduling, supplier, output_filepath):
     with open(filename_previous_largest_rowversion, "r") as file:
         rowversion_in = int(file.readline().strip())
 
-    # ignore test, cash and cash register customer (CustomerID = 1, 6, 11) NB!!!!! remove TOP 2
-    cursor.execute(f"SELECT TOP 2 CONVERT (INT, RowVersion) \
+    # ignore test, cash and cash register customer (CustomerID = 1, 6, 11)
+    cursor.execute(f"SELECT CONVERT (INT, RowVersion) \
                      FROM Orders \
                      WHERE RowVersion > ? AND CustomerID <> 1 \
                      AND CustomerID <> 6 AND CustomerID <> 11 \
@@ -152,15 +152,15 @@ def recurring(cursor, scheduling, supplier, output_filepath):
             print("\n==========================ERROR===============================\n \
                    Could not write to output directory\n")
             sys.exit(0)
-    # with open(filename_previous_largest_rowversion, "w") as file:#in
-    #     file.write(f"{str(largest_rowversion)}")#in
+    with open(filename_previous_largest_rowversion, "w") as file:
+        file.write(f"{str(largest_rowversion)}")
 
     print()
     print(f"Orders processed: {len(order_id_processed_list)}")
     for order_id in order_id_processed_list:
         print(f"OrderID: {order_id}")
 
-    scheduling.enter(5, 1, recurring, argument=(cursor, scheduling, supplier, output_filepath)) # NB!!!!!!!!!!!! 5 -> 1800
+    scheduling.enter(1800, 1, recurring, argument=(cursor, scheduling, supplier, output_filepath))
     scheduling.run()
 
 
@@ -177,8 +177,8 @@ def main():
         print("\n==========================ERROR===============================\n \
                Could not access supplier.txt\n \
                Please create a file called supplier.txt in the same directory as this program\n \
-               The file should contain: [cobuilderId] \
-                                        [company name] \
+               The file should contain: [cobuilderId] \n\
+                                        [company name] \n\
                                         [country code] (ex: NO)")
         sys.exit(0)
     try:
